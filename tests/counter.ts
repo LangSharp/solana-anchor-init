@@ -56,4 +56,30 @@ describe("counter", () => {
       console.log("Mensaje de error capturado:", err.error.errorMessage);
     }
   });
+
+
+  it("Cierra la puerta y recupera el Rent (Sol)", async() => {
+      const balanceBefore = await provider.connection.getBalance(provider.wallet.publicKey);
+      await program.methods
+      .close()
+      .accounts({
+          myCounter: myCounter.publicKey,
+          owner: provider.wallet.publicKey,
+          receiver: provider.wallet.publicKey,
+      })
+      .rpc();
+
+      try {
+          await program.account.counter.fetch(myCounter.publicKey);
+          expect.fail("La cuenta debio ser eliminada");
+      } catch (err) {
+          expect(err.message).to.contain("Account does not exist");
+          console.log("Cuenta eliminada exitosamente")
+      }
+
+      const balanceAfter = await provider.connection.getBalance(provider.wallet.publicKey);
+      expect(balanceAfter).to.be.greaterThan(balanceBefore);
+      console.log("Rembolse recibido");
+      console.log(`Ganancia neta: {balanceAfter - balanceBefore} lamports`);
+  });
 });

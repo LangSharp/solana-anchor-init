@@ -21,6 +21,11 @@ pub mod counter {
         msg!("The value counter is: {}", counter.count);
         Ok(())
     }
+
+    pub fn close(_ctx: Context<Close>) -> Result<()> {
+        msg!("Cuenta Cerrada, SOL recuperado");
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -38,6 +43,15 @@ pub struct Increment<'info > {
     #[account(mut, has_one = owner @ ErrorCode::Unauthorized)]
     pub my_counter: Account<'info, Counter>,
     pub owner: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct Close<'info> {
+    #[account(mut, close = receiver, has_one = owner @ ErrorCode::Unauthorized)]
+    pub my_counter: Account<'info, Counter>,
+    pub owner: Signer<'info>,
+    #[account(mut)]
+    pub receiver: SystemAccount<'info>,
 }
 
 #[error_code]
